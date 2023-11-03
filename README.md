@@ -1,2 +1,1 @@
-# Intro_Stata
-Stata commands
+# Introduction to Biostatistics using Stata
