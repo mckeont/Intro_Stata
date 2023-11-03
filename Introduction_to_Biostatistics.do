@@ -69,7 +69,7 @@ histogram price, freq bin(10) normal title(Your Title) subtitle(Your subtitle) /
 histogram rep78, freq bin(10) by(foreign) // Create two histograms by foreign status 
 histogram price if price < 10000, freq // Add a conditional statement, only values less than 10,000
 histogram turn, freq ylabel(0(15)60) ymtick(0(2)60) ytitle("values of y") //changing axis ticks
-// to change xaxis go into graph editor, change scale or ticks. 
+
 
 ** box and whisker plots **
 graph box length  // Vertical box plot, the y axis is numerical, and the x axis is categorical.
@@ -287,6 +287,8 @@ ranksum bp_before, by(sex)
 
 ///use low birth weight data for the chi-square and fischer's exact tests
 use "\Chi.Fish.McN_LBW.dta", clear // change this to match the path on your computer
+ 
+
 
 ///Goodness of fit test
 findit csgof
@@ -341,18 +343,6 @@ mcc cesd0dich23 cesd1dich23 //use the exact p-value when sum of the discordant r
 bysort race: tabstat ht, stats(n, mean, var, p25, p50, p75, SEM)
 bysort race: summ ht
 proportion ht, over(race)
-
-
-// case (cohort) study 
-cs varcase varexposed 
-csi #a #b #c #d  // fill in your own numbers
-// % cases /exposed  % cases/unexposed 
-
-// Case–control studies
-cc varcase varexposed 
-cci #a #b #c #d // fill in your own numbers
-// % exposed/cases  % exposed/controls  
-
 
 
 ///-------------------------------------------------------------///
@@ -505,10 +495,222 @@ spearman mpg headroom price,stats(rho  p)
 
 
 ///-------------------------------------------------------------///
-///-----creating a random sample--------------------------------///
+///----------------Multiple Linear regression-------------------///
 ///-------------------------------------------------------------///
 
-///------------------------------------------------
+///linear regression command with more than one independent variables
+regress mpg headroom foreign
+estimates store model1 //estimates store command allow us to recall results of this model later
+
+regress mpg headroom foreign weight 
+estimates store model2
+
+regress mpg headroom foreign weight price 
+estimates store model3
+
+regress mpg headroom foreign weight price i.rep78 
+estimates store model4
+
+///look at the results of all four models
+estimates table model1 model2 model3 model4, b(%4.3f) p(%4.3f) stats(r2 r2_a F df_m df_r) 
+	/// b(%7.3) Format beta coefficients to have three decimal places.  
+	/// p(%4.3). Format p-value
+
+///there was a decrease in adjusted Rsquared between model 2 and 3, but there was a jump for 4. Try removing the third variable and adding the fourth
+regress mpg headroom foreign weight i.rep78 
+estimates store model5
+
+estimates table model1 model2 model3 model4 model5, b(%7.3f) p(%4.3f) stats(r2 r2_a F df_m df_r) 
+
+///-------------------------------------------------------------///
+///----------------Confounding----------------------------------///
+///-------------------------------------------------------------///
+*is car length a confounder of the relationship between mpg and weight? 
+
+*1) examine relationship between length and weight
+scatter weight length 
+pwcorr weight length, sig
+regress weight length
+
+*2) examine relationship between length and mpg
+scatter mpg length 
+regress mpg length
+pwcorr mpg length, sig
+
+*3) see if the unadjusted regression estiamte varies from the adjusted
+regress mpg weight
+regress mpg weight length
+	///general rule is to look for variation of >10% between exposure and outcome. 
+
+///-------------------------------------------------------------///
+///----------------Immediate Commands----------------------------///
+///-------------------------------------------------------------///
+*You may specify values for some operations, when a dataset is not available. Read more about immediate commands: https://www.stata.com/manuals/u19.pdf
+ 
+ttesti 24 62.6 15.8 75
+	// ttesti #obs1 #mean1 #sd1 #obs2 #mean2 #sd2  , options 
+
+tabi 5 10 \ 2 14
+
+///-------------------------------------------------------------///
+///----------------Logistic regression--------------------------///
+///-------------------------------------------------------------///
+
+///bring in .dta stata data file. 
+webuse lbw.dta
+describe
+
+///Save a new version as you work, don't edit original data
+save "\Week 12\lbw.dta", replace
+
+///label 
+tab low
+label def YNFMT 0 "no" 1 "yes"
+label val low YNFMT
+tab low
+
+///There are limited number of women who had 2 or 3. Create a binary variable from ptl (history of pre-term labor). 
+tab ptl
+recode ptl (2/3=1), gen(ptlYN)
+label var ptlYN "Any history of premature labor"
+label val ptlYN YNTMT
+tab ptlYN
+
+///create a variable that numbers physician visits as 0, 1, or 2+
+tab ftv
+recode ftv (2/6=2 "2+"), gen(ftv_cat)
+label var ftv_cat "Number of visits to physician during 1st trimester"
+tab ftv_cat
+
+recode ftv (1/6=1), gen(ftvYN)
+label val ftvYN YNFMT
+tab ftvYN
+
+///-------------------------------------------------------------///
+///----------------Pre-analysis checks--------------------------///
+///-------------------------------------------------------------///
+*outcome of interest = low (low birth weight binary)
+
+///summary stats and copmarisons
+tab low smoke, col chi
+tab low ptlYN, col
+tab low race, col chi
+
+graph box lwt, over(low)
+sdtest lwt, by(low) 
+ttest lwt, by(low) 
+
+///-------------------------------------------------------------///
+///----------------Logistic regression--------------------------///
+///-------------------------------------------------------------///
+///simple logistic regression first
+logistic low smoke
+
+///using factor notation and changing the comparator 
+logistic low i.race
+logistic low ib2.race
+
+///multiple logisic regression
+logistic low smoke ptlYN i.race lwt 
+
+
+
+///-------------------------------------------------------------///
+///----------------Confounding----------------------------------///
+///-------------------------------------------------------------///
+*is smoking status confounded by race?
+*1) examine relationship between smoking status and race
+tab smoke race, col chi
+
+*2) examine relationship between low and race
+tab low race, col chi
+
+///see if the unadjusted regression estiamte varies from the adjusted
+logistic low smoke
+logistic low smoke i.race
+	///display (2.02-3.05)/2.02 ~ 50%
+	///--> general rule is to look for variation of >10% 
+
+///-------------------------------------------------------------///
+///----------------Interaction----------------------------------///
+///-------------------------------------------------------------///
+*is the relationship between exposure and outcome different based on another variable? 
+*is the relationship between premature labor history and low birth weight vary based on uterine iritability? 
+
+///examine the difference
+tab low ptlYN if ui==0, col
+tab low ptlYN if ui==1, col
+
+table ptlYN ui, contents(mean low) format(%5.4f) //shows above lines in all one table
+
+///including interaction in a regression
+logistic low ptlYN
+logistic low ui
+logistic low ptlYN ui
+logistic low ptlYN##ui
+	///somtimes there is a generally rule that an interaction term with p<0.1 is significant
+
+OR for ptlYN at ui=0 is 5.48
+OR for ptlYN at ui=1 is 5.48*0.25 = 1.37
+
+margins, over(ptlYN ui) expression(exp(xb())) 
+OR for ptlYN at ui=0 is 1.625 / 0.296 = 5.48
+OR for ptlYN at ui=1 is 1.25 / 0.9 = 1.38
+
+///-------------------------------------------------------------///
+///----------------2x2 tables-----------------------------------///
+///-------------------------------------------------------------///
+
+///cohort studies use -cs-
+cs low smoke // cs varcases varexposed 
+csi 30 25 19 10
+// Proportions to report: 
+    // % cases /exposed  
+	// % cases/unexposed 
+
+///case control or cross sectional use -cc-
+cc low smoke // cc varcase varexposed 
+cci 30 25 19 10
+// Proportions to report:
+	// % exposed/cases 
+	// % exposed/controls  
+	
+	
+///------------------------------------------------------///
+///-----Survival Analysis--------------------------------///
+///------------------------------------------------------///	
+sysuse cancer
+describe
+
+// How many deaths occurred in each group?
+tab drug died, row  
+	// In the drug group 6 (42.86%) of the 14 died
+	// In the Placebo group 1 (5.00%) of the 20 died
+	
+// Use the product-limit method to estimate the survival function for each treatment group. First need to declare that this is survival data. 
+stset studytime, failure (died==1)
+
+// Two ways to estimate the survival function for each treatment group
+*1) 
+sts list, by(drug)
+	// Produces a list of the survival estimates for each time point for the two groups defined by the variable treatment. 
+*2) The second way is to use a separate command for each group.
+sts list if drug==1 for the first group and
+sts list if drug==0 for the second group
+
+// What is the median survival for each treatment group?
+stci, by(drug)
+
+// Construct survival curves for the 2 treatment groups based on the product limit estimate of S(t)
+sts graph, by(drug)
+
+// Use the log-rank test to evaluate the null hypothesis. What do you conclude?
+sts test drug
+
+///------------------------------------------------------///
+///-----creating a random sample-------------------------///
+///------------------------------------------------------///
+
 ///random sample of 50% of the original
 sample 50
 tabstat weight, stats(mean median var)
