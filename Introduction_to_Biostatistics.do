@@ -4,8 +4,6 @@
 * Tutorial by Thomas P. McKeon, MPH   *
 * November 2023                        *
 *--------------------------------------*
-
-
 * Data Import and Cleaning
 clear  // Clear previous data
 display (4+5)^2  // Use Stata as a calculator
