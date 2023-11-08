@@ -339,11 +339,9 @@ tab cesd0dich23 cesd1dich23, row col //row and col allow for row and column perc
 ///The -mcc- runs McNemar's test (mcc = matched case control)
 mcc cesd0dich23 cesd1dich23 //use the exact p-value when sum of the discordant rows < 20
 
-
 bysort race: tabstat ht, stats(n, mean, var, p25, p50, p75, SEM)
 bysort race: summ ht
 proportion ht, over(race)
-
 
 ///-------------------------------------------------------------///
 ///--------------Paired power calculations----------------------///
@@ -483,7 +481,6 @@ estat hettest, rhs
 ///pearson correlation
 corr mpg headroom 
 pwcorr mpg headroom, sig //this gives the p-value associated with correlation
-
 
 ///spearman correlation
 spearman mpg headroom 
