@@ -701,11 +701,9 @@ sts graph, by(drug)
 
 // Use the log-rank test to evaluate the null hypothesis. What do you conclude?
 sts test drug
-
 ///------------------------------------------------------///
 ///-----creating a random sample-------------------------///
 ///------------------------------------------------------///
-
 ///random sample of 50% of the original
 sample 50
 tabstat weight, stats(mean median var)
@@ -714,13 +712,11 @@ summ weight, detail
 ///do another sample to see that it is different
 sample 50
 tabstat weight, stats(mean median var)
-
 ///------------------------------------------------
 ///setting the seed to get reproducable results
 set seed 1298767
 sample 50
 tabstat weight, stats(mean median var)
-
 ///------------------------------------------------
 ///random sample of n=50 instead of 50%
 sample 50, count
