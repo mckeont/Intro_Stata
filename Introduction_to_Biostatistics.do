@@ -1,7 +1,7 @@
 .
 *--------------------------------------*
-* Introduction to Biostatistics       *
-* Tutorial by Thomas P. McKeon, MPH   *
+* Introduction to Biostatistics        *
+* Tutorial by Thomas P. McKeon, MPH    *
 * November 2023                        *
 *--------------------------------------*
 * Data Import and Cleaning
