@@ -723,3 +723,8 @@ tabstat weight, stats(mean median var)
 sample 50, count
 tabstat weight, stats(mean median var)
 
+
+/// Extra Frequency Polygon
+
+histogram age, frequency // in graph editor open >> Show object Browser >> plotregion >> plottype line
+// https://www.statalist.org/forums/forum/general-stata-discussion/general/1393817-connect-each-bar-in-histogram-graph-to-become-line-graph
