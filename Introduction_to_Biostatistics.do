@@ -50,6 +50,7 @@ tab rep78, m nolab // you can combine options
 tab rep78, summ(price) //produces one- and two-way tables (breakdowns) of means and standard deviations.
 tab1 rep78 make foreign  // If you're interested in using multiple variables and you want the separate distributions of each, then use -tab1-. -tab- will give you a cross-tabulation of the two variables
 proportion rep78  // Estimate proportions
+tab rep78, plot // make a leaf and stem plot
 
 ///summary stats
 summ length  // Summary statistics
