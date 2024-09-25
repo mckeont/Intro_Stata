@@ -2,7 +2,6 @@
 *--------------------------------------*
 * Introduction to Biostatistics        *
 * Tutorial by Thomas P. McKeon, MPH    *
-* November 2023                        *
 *--------------------------------------*
 * Data Import and Cleaning
 clear  // Clear previous data
@@ -728,3 +727,17 @@ tabstat weight, stats(mean median var)
 
 histogram age, frequency // in graph editor open >> Show object Browser >> plotregion >> plottype line
 // https://www.statalist.org/forums/forum/general-stata-discussion/general/1393817-connect-each-bar-in-histogram-graph-to-become-line-graph
+
+//Extra notes:
+// Finding the mode example.
+// . encode Type_of_Ar , gen(Type_of_Ar_num)
+
+// . bysort ZC Type_of_Ar_num: gen Type_of_Ar_freq = _N
+
+// . bysort ZC(Type_of_Ar_freq): gen mode_Type_of_Ar_num = Type_of_Ar_num[_N]
+
+// . bysort ZC: keep if _n == _N
+(11,201 observations deleted)
+
+// . export delimited using "zipcodetypeart.csv", replace
+
