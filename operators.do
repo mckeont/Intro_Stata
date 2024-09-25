@@ -31,3 +31,9 @@ gen high_bwt = 1 if lowbwt >= 40 & lowbwt != .
 
 * Optional: Display the new variable to check
 list nation lowbwt high_bwt if lowbwt >= 40 & lowbwt != .
+
+
+* To generate a new variable with random numbers ranging from 1 to 10 in Stata,
+* you can use the runiformint() function within the generate command. Here's how you can do it:
+generate painscore = runiformint(1, 10)
+recode painscore (1/5=1) (6/10=2), gen(paingroup)
