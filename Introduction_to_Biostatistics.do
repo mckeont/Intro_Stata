@@ -136,11 +136,11 @@ tab mpg mpgrecode
 rename  mpg mpg_new
 rename (trunk length price) (trunkNEW lengthNEW priceNEW) // rename several at same time
 
-// Converting numeric to categorical 
+// Converting categorical to numerica
 encode make, generate(make_numeric) 
 tab make_numeric, nolab 
 
-// Converting categorical to numeric
+// Converting numeric to categorical 
 decode make_numeric, generate(make_string)
 tab make_string
 
